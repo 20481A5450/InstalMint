@@ -5,7 +5,7 @@
 ## 🚀 About the Project
 Advanced EMI Calculator is a **feature-rich** and **user-friendly** tool designed specifically for Indian consumers in 2025. It helps users calculate monthly EMI payments, compare loan options, and estimate loan affordability.
 
-🔗 **Live Demo:** [Streamlit Cloud Deployment](https://instalmint.streamlit.app/)
+🔗 **Live Demo:** <a href="https://instalmint.streamlit.app/" target="_blank" rel="noopener noreferrer">Streamlit Cloud Deployment</a>
 
 ---
 
