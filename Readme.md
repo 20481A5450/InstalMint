@@ -47,12 +47,6 @@ streamlit run app.py
 
 ---
 
-## 📸 Screenshots
-![Loan Calculator](https://your-image-url.com/screenshot1.png)
-![Comparison Feature](https://your-image-url.com/screenshot2.png)
-
----
-
 ## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
