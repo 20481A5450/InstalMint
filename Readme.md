@@ -34,7 +34,7 @@ pip install -r requirements.txt
 
 ### 3️⃣ Run the Application:
 ```bash
-streamlit run app.py
+emi_Cal run app.py
 ```
 
 ---
@@ -44,11 +44,6 @@ streamlit run app.py
 - **Streamlit** (UI Framework)
 - **Pandas & NumPy** (Data Processing)
 - **Plotly** (Data Visualization)
-
----
-
-## 📜 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
