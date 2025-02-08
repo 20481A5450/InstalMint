@@ -40,10 +40,10 @@ def generate_amortization_schedule(principal, annual_rate, tenure_years, prepaym
     df = pd.DataFrame(schedule, columns=['Month', 'EMI', 'Principal Payment', 'Interest Payment', 'Remaining Balance'])
     return df
 
-def create_download_link(df, filename="amortization_schedule.csv"):
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()
-    return f'<a href="data:file/csv;base64,{b64}" download="{filename}">Download CSV</a>'
+def calculate_affordability(salary, expenses, saving_percent=30):
+    disposable_income = salary - expenses
+    max_emi = (saving_percent / 100) * disposable_income
+    return max_emi
 
 st.set_page_config(layout="wide")
 st.markdown("<h1 style='font-size:22px;'>Advanced EMI Calculator for Indian Consumers - 2025</h1>", unsafe_allow_html=True)
@@ -64,33 +64,47 @@ annual_rate = st.sidebar.number_input("Annual Interest Rate (%)", min_value=0.0,
 tenure_years = st.sidebar.number_input("Loan Tenure (Years)", min_value=0, value=default_tenure, step=1)
 prepayment = st.sidebar.number_input("Monthly Prepayment Amount (₹)", min_value=0.0, value=0.0, step=1000.0)
 
+# Loan Affordability Section
+st.sidebar.markdown("<h3 style='font-size:16px;'>Loan Affordability Estimator</h3>", unsafe_allow_html=True)
+salary = st.sidebar.number_input("Monthly Salary (₹)", min_value=0.0, value=50000.0, step=5000.0)
+expenses = st.sidebar.number_input("Monthly Expenses (₹)", min_value=0.0, value=20000.0, step=5000.0)
+max_emi = calculate_affordability(salary, expenses)
+st.sidebar.markdown(f"<h4 style='font-size:14px;'>Max Affordable EMI: ₹{max_emi:,.2f}</h4>", unsafe_allow_html=True)
+
 emi = None
 if st.sidebar.button("Calculate EMI"):
     emi, tenure_months = calculate_emi(principal, annual_rate, tenure_years)
     st.sidebar.markdown(f"<h4 style='font-size:14px;'>Your Monthly EMI: ₹{emi:,.2f}</h4>", unsafe_allow_html=True)
 
+# Loan Comparison Mode
+st.markdown("<h2 style='font-size:18px;'>Compare Loan Options</h2>", unsafe_allow_html=True)
+st.markdown("Select different loan types to compare their EMI calculations.")
+comparison_loans = st.multiselect("Select Loan Types to Compare", list(rates.keys()))
+comparison_data = []
+for loan in comparison_loans:
+    emi, _ = calculate_emi(principal, rates[loan], tenures[loan])
+    comparison_data.append((loan, emi))
+comparison_df = pd.DataFrame(comparison_data, columns=["Loan Type", "EMI (₹)"])
+st.dataframe(comparison_df)
+
 # Main Content Layout
 st.markdown("<h2 style='font-size:18px;'>Loan Summary</h2>", unsafe_allow_html=True)
 st.markdown(f"<h3 style='font-size:16px;'>EMI: ₹{emi:,.2f}</h3>" if emi else "<h3 style='font-size:16px;'>EMI: -</h3>", unsafe_allow_html=True)
 
-col1, col2 = st.columns([2, 1])
+st.markdown("<h3 style='font-size:16px;'>Loan Balance Over Time</h3>", unsafe_allow_html=True)
+if emi:
+    schedule = generate_amortization_schedule(principal, annual_rate, tenure_years, prepayment)
+    fig = px.line(schedule, x='Month', y='Remaining Balance', title='Loan Amortization Schedule',
+                labels={'Month': 'Month', 'Remaining Balance': 'Remaining Loan Balance (₹)'},
+                markers=True)
+    st.plotly_chart(fig)
 
-with col1:
-    st.markdown("<h3 style='font-size:16px;'>Loan Balance Over Time</h3>", unsafe_allow_html=True)
-    if emi:
-        schedule = generate_amortization_schedule(principal, annual_rate, tenure_years, prepayment)
-        fig = px.line(schedule, x='Month', y='Remaining Balance', title='Loan Amortization Schedule',
-                    labels={'Month': 'Month', 'Remaining Balance': 'Remaining Loan Balance (₹)'},
-                    markers=True)
-        st.plotly_chart(fig)
-    
-with col2:
-    st.markdown("<h3 style='font-size:16px;'>Payment Breakdown</h3>", unsafe_allow_html=True)
-    if emi:
-        fig_pie = px.pie(values=[schedule['Principal Payment'].sum(), schedule['Interest Payment'].sum()], 
-                        names=['Principal', 'Interest'], 
-                        title='Total Payment Breakdown')
-        st.plotly_chart(fig_pie)
+st.markdown("<h3 style='font-size:16px;'>Payment Breakdown</h3>", unsafe_allow_html=True)
+if emi:
+    fig_pie = px.pie(values=[schedule['Principal Payment'].sum(), schedule['Interest Payment'].sum()], 
+                    names=['Principal', 'Interest'], 
+                    title='Total Payment Breakdown')
+    st.plotly_chart(fig_pie)
 
 st.markdown("<h3 style='font-size:16px;'>Amortization Schedule</h3>", unsafe_allow_html=True)
 if emi:
@@ -99,9 +113,3 @@ if emi:
 st.markdown("<h3 style='font-size:16px;'>Download Report</h3>", unsafe_allow_html=True)
 if emi:
     st.markdown(create_download_link(schedule), unsafe_allow_html=True)
-
-# Right Sidebar with Additional Features
-st.sidebar.markdown("<h3 style='font-size:16px;'>Loan Insights & Tips</h3>", unsafe_allow_html=True)
-st.sidebar.info("Consider making prepayments to reduce total interest paid!")
-st.sidebar.info("Compare interest rates from multiple banks before finalizing a loan.")
-st.sidebar.info("Longer tenures reduce EMI but increase overall interest payments.")
