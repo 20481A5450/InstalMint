@@ -85,7 +85,7 @@ for loan in comparison_loans:
     emi, _ = calculate_emi(principal, rates[loan], tenures[loan])
     comparison_data.append((loan, emi))
 comparison_df = pd.DataFrame(comparison_data, columns=["Loan Type", "EMI (₹)"])
-st.dataframe(comparison_df, width=300, height=300)
+st.dataframe(comparison_df, width=300, height=200)
 
 # Main Content Layout
 st.markdown("<h2 style='font-size:18px;'>Loan Summary</h2>", unsafe_allow_html=True)
